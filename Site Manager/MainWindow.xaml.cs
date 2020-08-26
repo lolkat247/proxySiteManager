@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Remoting.Proxies;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Permissions;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -15,6 +17,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.Win32;
 
 namespace Site_Manager
 {
@@ -93,6 +96,29 @@ namespace Site_Manager
             s.Close();
         }
 
+        
+        private void editIEProxyReg(string exclude, bool isEnabled)
+        {
+            System.AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal);
+            if (isEnabled)
+            {
+                RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Internet Settings", true);
+                key.SetValue("MigrateProxy", 0x00000001);
+                key.SetValue("ProxyEnable", 0x00000001);
+                key.SetValue("ProxyServer", "127.0.0.1:80");
+                key.SetValue("ProxyOverride", exclude);
+                key.Close();
+                Console.WriteLine("shoudl be on");
+            }
+            else
+            {
+                RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Internet Settings", true);
+                key.SetValue("ProxyEnable", 0x00000000);
+                key.Close();
+                Console.WriteLine("should be off");
+            }
+        }
+
         private void applyButton_Click(object sender, RoutedEventArgs e)
         {
             // save state of radio buttons
@@ -110,17 +136,14 @@ namespace Site_Manager
 
             serializeStorage();
 
-            string finalCmdOut = "netsh winhttp set proxy 127.0.0.1 bypass-list=\"";
+            string finalOut = "";
             foreach (var x in holder.whitelist)
             {
-                finalCmdOut += x + ";";
+                finalOut += x + ";";
             }
-            finalCmdOut += "\"";
+            finalOut = finalOut.Remove(finalOut.Length - 1, 1);
 
-            if (holder.proxyIsEnabled == true)
-            {
-                Console.WriteLine(finalCmdOut);
-            }
+            editIEProxyReg(finalOut, holder.proxyIsEnabled);
         }
     }
 
