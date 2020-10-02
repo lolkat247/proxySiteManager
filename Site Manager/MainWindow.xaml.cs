@@ -102,7 +102,7 @@ namespace Site_Manager
             System.AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal);
             if (isEnabled)
             {
-                RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Internet Settings", true);
+                RegistryKey key = Registry.Users.OpenSubKey(@"S-1-5-21-3794728147-2870682560-2744185785-1001\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings", true);
                 key.SetValue("MigrateProxy", 0x00000001);
                 key.SetValue("ProxyEnable", 0x00000001);
                 key.SetValue("ProxyServer", "127.0.0.1:80");
@@ -112,7 +112,7 @@ namespace Site_Manager
             }
             else
             {
-                RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Internet Settings", true);
+                RegistryKey key = Registry.Users.OpenSubKey(@"S-1-5-21-3794728147-2870682560-2744185785-1001\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings", true);
                 key.SetValue("ProxyEnable", 0x00000000);
                 key.Close();
                 Console.WriteLine("should be off");
